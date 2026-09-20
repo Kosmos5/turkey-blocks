@@ -553,22 +553,21 @@ kbd{
   var DEFAULT_CFG = {
     /* —— 涨行 —— */
     emptyMin: 2,          // 新行至少空几格
-    emptyMax: 6,          // 新行至多空几格
+    emptyMax: 5,          // 新行至多空几格
     spEvery: 5,           // 每涨 N 行，其中 1 条 1 格方块变成金色奖励格
     advFirst: 8,          // 第几次涨行开始出现红色困难块
     advEvery: 10,         // 之后每 N 行出现 1 条困难块
-    rampEvery: 30,        // 每涨 N 行难度 +1 档（0 = 关闭）
+    rampEvery: 20,        // 每涨 N 行难度 +1 档（0 = 关闭）
     minRows: 2,           // 场上「有格子的行数」少于这个数时，自动从底部补行
-    emptyTilt: 0.35,      // 难度对「空格数」的倾斜：每档让新行更偏向 emptyMax 那一端
+    emptyTilt: 0.3,       // 难度对「空格数」的倾斜：每档让新行更偏向 emptyMax 那一端
     advTighten: 2,        // 每升 1 档，困难行间隔缩短几行（有下限 4）
-    levelWeights: null,   // 每个档位的 [1格,2格,3格,4格] 权重表；null = 用默认公式生成
+    levelWeights: null,   // 每个档位的 [1格,2格,3格,4格] 权重表；null = 用 DEFAULT_LEVEL_WEIGHTS
 
     /* —— 连击系数：一次操作消掉 N 行时，积分 ×系数（向上取整） —— */
     combo2: 1.2,
     combo3: 1.4,
     combo4: 1.6,
     combo5: 2.0,
-    baseWeights: { 1: 34, 2: 30, 3: 22, 4: 14 },   // 新行里各方块长度的基础权重
 
     /* —— 计分 —— */
     skillCost: 1000,
@@ -594,8 +593,8 @@ kbd{
     var c = JSON.parse(JSON.stringify(DEFAULT_CFG));
     if (saved && typeof saved === 'object') {
       for (var k in c) {
-        if (k === 'baseWeights') {
-          if (saved.baseWeights) for (var w in c.baseWeights) if (typeof saved.baseWeights[w] === 'number') c.baseWeights[w] = saved.baseWeights[w];
+        if (k === 'levelWeights') {
+          if (saved.levelWeights && typeof saved.levelWeights === 'object') c.levelWeights = saved.levelWeights;
         } else if (typeof saved[k] === typeof c[k]) c[k] = saved[k];
       }
     }
@@ -838,19 +837,17 @@ kbd{
     return Math.floor(G.tideCount / CFG.rampEvery);
   }
   // 后段难度：长条权重上升、困难行更频繁
-  // 每档用哪套权重由 CFG.levelWeights 决定（设置面板里可逐档编辑）
-  var DEFAULT_LEVELS = 8;
+  // ★ 每档用哪套权重**完全以这张表为准**（设置面板里可逐档编辑），不再走公式升档
+  var DEFAULT_LEVEL_WEIGHTS = [
+    [30, 30, 15, 10],   // 档位 0
+    [25, 30, 20, 15],   // 档位 1
+    [20, 25, 25, 20],   // 档位 2
+    [15, 25, 30, 25],   // 档位 3
+    [10, 20, 35, 30],   // 档位 4
+    [5, 20, 40, 35]     // 档位 5（再往上的档位沿用这一行）
+  ];
   function defaultLevelWeights() {
-    var out = [], L, b = CFG.baseWeights;
-    for (L = 0; L < DEFAULT_LEVELS; L++) {
-      out.push([
-        Math.max(4, (b[1] || 34) - 5 * L),
-        Math.max(6, (b[2] || 30) - 1 * L),
-        (b[3] || 22) + 3 * L,
-        (b[4] || 14) + 5 * L
-      ]);
-    }
-    return out;
+    return DEFAULT_LEVEL_WEIGHTS.map(function (r) { return r.slice(); });
   }
   function currentLevelWeights() {
     var t = CFG.levelWeights;
@@ -1868,7 +1865,7 @@ kbd{
             if (o && typeof o === 'object') {
               for (var kk in CFG) {
                 if (!(kk in o)) continue;
-                if (kk === 'baseWeights' || kk === 'levelWeights') {
+                if (kk === 'levelWeights') {
                   if (o[kk] && typeof o[kk] === 'object') CFG[kk] = JSON.parse(JSON.stringify(o[kk]));
                 } else if (typeof o[kk] === typeof CFG[kk]) {
                   CFG[kk] = o[kk];
