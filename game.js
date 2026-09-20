@@ -1249,6 +1249,14 @@
       '</select></label>' +
       '<label class="check"><input type="checkbox" id="cfgPreview"' + (CFG.preview ? ' checked' : '') + '> 预告下一行</label>' +
       '</div>' +
+      '<h3 class="grp">数值导出 / 导入</h3>' +
+      '<p class="muted small" style="text-align:left;margin:0 0 6px">' +
+      '数值是存在<b>当前网址</b>的浏览器里的。把下面这段复制走，粘到别的浏览器 / 别的网址（比如从本地搬到线上），点「导入并重开」就能整套套用。</p>' +
+      '<textarea id="cfgExport" class="cfgexport" spellcheck="false">' + JSON.stringify(CFG) + '</textarea>' +
+      '<div class="btnrow" style="margin-top:8px">' +
+      '<button data-act="copycfg">复制这段数值</button>' +
+      '<button class="primary" data-act="importcfg">导入并重开</button>' +
+      '</div>' +
       '<div class="btnrow">' +
       '<button class="primary" data-act="savecfg">保存并重开</button>' +
       '<button data-act="resetcfg">恢复默认</button>' +
@@ -1313,6 +1321,37 @@
         else if (act === 'resetw') {
           editWeights = defaultLevelWeights();
           refreshWeightTable();
+        }
+        else if (act === 'copycfg') {
+          var ta = $('cfgExport');
+          if (ta) {
+            ta.focus(); ta.select();
+            try { ta.setSelectionRange(0, 999999); } catch (e2) {}
+            var done = false;
+            try { done = document.execCommand('copy'); } catch (e3) {}
+            toast(done ? '数值已复制到剪贴板' : '已全选，按 Ctrl+C 复制');
+          }
+        }
+        else if (act === 'importcfg') {
+          var box = $('cfgExport');
+          var okImp = false;
+          try {
+            var o = JSON.parse(box.value);
+            if (o && typeof o === 'object') {
+              for (var kk in CFG) {
+                if (!(kk in o)) continue;
+                if (kk === 'baseWeights' || kk === 'levelWeights') {
+                  if (o[kk] && typeof o[kk] === 'object') CFG[kk] = JSON.parse(JSON.stringify(o[kk]));
+                } else if (typeof o[kk] === typeof CFG[kk]) {
+                  CFG[kk] = o[kk];
+                }
+              }
+              okImp = true;
+            }
+          } catch (e4) { okImp = false; }
+          if (!okImp) { toast('这段数值格式不对，请整段复制粘贴'); return; }
+          saveCfg(); hideOverlay(); newGame();
+          toast('数值已导入，已按新数值重开');
         }
         else if (act === 'close') { if (G.running) hideOverlay(); else newGame(); }
         else if (act === 'resetcfg') { CFG = JSON.parse(JSON.stringify(DEFAULT_CFG)); saveCfg(); hideOverlay(); newGame(); }
