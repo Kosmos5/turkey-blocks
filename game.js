@@ -559,7 +559,8 @@
     dom.skill = $('skill'); dom.skillBar = $('skillBar');
     dom.cells = $('cells'); dom.rows = $('rows');
     dom.tide = $('tide'); dom.moves = $('moves'); dom.level = $('level');
-    dom.preview = $('preview'); dom.rhythm = $('rhythm');
+    dom.nextStrip = $('nextStrip');
+    dom.rhythm = $('rhythm');
     dom.skillInfo = $('skillInfo'); dom.btnSkill = $('btnSkill'); dom.costLabel = $('costLabel');
     dom.overlay = $('overlay'); dom.toast = $('toast');
     dom.heightBar = $('heightBar'); dom.passBtn = $('passBtn'); dom.dragTip = $('dragTip');
@@ -632,29 +633,26 @@
     })());
   }
 
-  function renderPreview() {
-    if (!CFG.preview || !G.nextRow) { dom.preview.innerHTML = '<span class="muted small">已关闭预告</span>'; return; }
-    var map = {};
-    for (var i = 0; i < G.nextRow.cells.length; i++) {
-      var s = G.nextRow.cells[i];
-      map[s.c] = s;
-    }
-    var html = '<div class="pvrow">';
+  // 下一行预告：贴在棋盘底边的加粗色条（哪几列会顶上来）
+  function syncNextStrip() {
+    if (!dom.nextStrip) return;
+    if (!CFG.preview || !G.nextRow) { dom.nextStrip.classList.add('off'); return; }
+    dom.nextStrip.classList.remove('off');
+    var map = {}, i;
+    for (i = 0; i < G.nextRow.cells.length; i++) map[G.nextRow.cells[i].c] = G.nextRow.cells[i];
+    var html = '';
     for (var c = 0; c < COLS; c++) {
-      var s2 = map[c];
-      if (!s2) { html += '<div class="mini empty"></div>'; continue; }
-      var l = map[c - 1], r2 = map[c + 1];
-      var edge =
-        (l && l.gid === s2.gid ? '' : ' e-l') +
-        (r2 && r2.gid === s2.gid ? '' : ' e-r');
-      html += '<div class="mini t' + s2.t + (s2.t === T.ADV ? ' adv' : '') + edge + ' e-t e-b">' +
-        (s2.t === T.SP ? '★' : '') + '</div>';
+      var s = map[c];
+      if (!s) { html += '<div class="ncell"></div>'; continue; }
+      var l = map[c - 1], r = map[c + 1];
+      var e = (l && l.gid === s.gid ? '' : ' e-l') + (r && r.gid === s.gid ? '' : ' e-r');
+      html += '<div class="ncell on t' + s.t + (s.t === T.ADV ? ' adv' : '') + e + '"></div>';
     }
-    html += '</div>';
-    var label = G.nextRow.isAdv ? '困难行（含 4 格血困难块）' : (G.nextRow.isSp ? '含金色奖励格 ★' : '普通行');
-    dom.preview.innerHTML = html + '<span class="pvtip">第 ' + G.nextRow.index + ' 行 · ' +
-      G.nextRow.cells.length + ' 格 · ' + label + '</span>';
+    if (s_lastStrip !== html) { dom.nextStrip.innerHTML = html; s_lastStrip = html; }
+    dom.nextStrip.title = '下一行：第 ' + G.nextRow.index + ' 行 · ' + G.nextRow.cells.length + ' 格 · ' +
+      (G.nextRow.isAdv ? '困难行' : (G.nextRow.isSp ? '含金色奖励格 ★' : '普通行'));
   }
+  var s_lastStrip = '';
 
   function renderHud() {
     dom.score.textContent = G.score;
@@ -710,7 +708,7 @@
 
   function render() {
     syncBoard();
-    renderPreview();
+    syncNextStrip();
     renderHud();
     renderSkillPanel();
   }
