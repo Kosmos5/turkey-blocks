@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>土耳其方块 · Turkey Blocks</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- 顶栏 -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo"></span>
+      <div>
+        <h1>土耳其方块</h1>
+        <p>10 × 9 · 平移任意一行 · 底部不断涨行</p>
+      </div>
+    </div>
+
+    <div class="hud">
+      <div class="stat">
+        <span class="k">积分</span>
+        <b id="score">0</b>
+      </div>
+      <div class="stat">
+        <span class="k">最高分</span>
+        <b id="best">0</b>
+      </div>
+      <div class="stat skillstat">
+        <span class="k">技能点</span>
+        <b id="skill">0</b>
+        <div class="bar"><i id="skillBar"></i></div>
+      </div>
+      <div class="stat heightstat">
+        <span class="k">危险度（最高列）</span>
+        <div class="bar"><i id="heightBar"></i></div>
+      </div>
+    </div>
+
+    <div class="acts">
+      <button data-act="help">规则</button>
+      <button data-act="settings">设置</button>
+      <button data-act="restart">重开</button>
+    </div>
+  </header>
+
+  <!-- 主体 -->
+  <main class="main">
+
+    <!-- 左侧信息 -->
+    <aside class="side">
+      <div class="card">
+        <h3>下一行（涨行预告）</h3>
+        <div id="preview" class="preview"></div>
+        <p class="muted small" id="rhythm">—</p>
+      </div>
+
+      <div class="card">
+        <h3>本局数据</h3>
+        <div class="kv"><span>已消除格数</span><b id="cells">0</b></div>
+        <div class="kv"><span>已消除行数</span><b id="rows">0</b></div>
+        <div class="kv"><span>已涨行数</span><b id="tide">0</b></div>
+        <div class="kv"><span>移动次数</span><b id="moves">0</b></div>
+        <div class="kv"><span>难度档位</span><b id="level">1</b></div>
+      </div>
+    </aside>
+
+    <!-- 棋盘 -->
+    <section class="stage">
+      <div class="boardwrap" id="boardWrap">
+        <div id="board"></div>
+        <div id="dragTip" class="dragtip"></div>
+        <div class="topsign">↑ 最上一行：涨行时若有格子被顶到这里之外 → 失败</div>
+      </div>
+
+      <p class="hintline">按住任意一段连续格子<b>左右拖动</b>即可移动它 · 松手后悬空的格子会往下掉</p>
+
+      <div class="pad">
+        <button data-act="pass" id="passBtn" class="padbtn" aria-label="跳过本回合">跳过本回合（直接涨一行）</button>
+      </div>
+    </section>
+
+    <!-- 右侧技能 -->
+    <aside class="side">
+      <div class="card">
+        <h3>技能</h3>
+        <p class="muted">消耗 <b id="costLabel">1000</b> 技能点：先点选盘面上的 1~4 类型格子，再发动。</p>
+        <div id="skillInfo" class="skillinfo"><span class="muted">点击盘面上的格子进行选择</span></div>
+        <button id="btnSkill" class="primary block" data-act="skill" disabled>发动技能</button>
+      </div>
+
+      <div class="card">
+        <h3>技能一览</h3>
+        <ul class="skilllist">
+          <li><i class="dot t1"></i><b>1 类型（绿）</b>：左右连续空格铺成 1 类型</li>
+          <li><i class="dot t2"></i><b>2 类型（蓝）</b>：移除场上全部 2 类型方块（不计分）</li>
+          <li><i class="dot t3"></i><b>3 类型（紫）</b>：全部拆成 3 个独立的 1 类型</li>
+          <li><i class="dot t4"></i><b>4 类型（橙）</b>：全部砍掉一半，剩 2 格变 2 类型</li>
+          <li><i class="dot t5"></i><b>金色 ★</b>：积分奖励格，消除 +200 积分</li>
+          <li><i class="dot t6"></i><b>红色</b>：困难块，4 格血，每次消除只掉 1 格</li>
+        </ul>
+        <p class="muted small">金色奖励格与红色困难块不能被技能选中，也不受技能影响。</p>
+      </div>
+    </aside>
+
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+<div id="overlay" class="overlay"></div>
+
+<script src="game.js"></script>
+</body>
+</html>
