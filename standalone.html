@@ -886,16 +886,15 @@ kbd{
     return weightedPick(w);
   }
 
-  // 一把长度总和正好等于 fill 的方块（长度 1~4，相邻尽量不同色）
+  // 拼出一串长度、总和正好等于 fill 的方块（长度 1~4）
+  // 只限制「长度 ≤ 剩余空间」，不做其它限制（相邻两条可以同长度）
   function makeLens(fill, w, forceFirst) {
     var lens = [], sum = 0, k;
     if (forceFirst) { lens.push(forceFirst); sum = forceFirst; }
     var guard = 0;
     while (sum < fill && guard++ < 60) {
-      var room = fill - sum, last = lens[lens.length - 1];
-      var ww = {};
-      for (k in w) if (Number(k) <= room && Number(k) !== last) ww[k] = w[k];
-      if (!Object.keys(ww).length) for (k in w) if (Number(k) <= room) ww[k] = w[k];
+      var room = fill - sum, ww = {};
+      for (k in w) if (Number(k) <= room) ww[k] = w[k];
       if (!Object.keys(ww).length) break;
       var L = weightedPick(ww);
       if (!L) break;
