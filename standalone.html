@@ -559,7 +559,7 @@ kbd{
     advEvery: 10,         // 之后每 N 行出现 1 条困难块
     rampEvery: 20,        // 每涨 N 行难度 +1 档（0 = 关闭）
     minRows: 2,           // 场上「有格子的行数」少于这个数时，自动从底部补行
-    emptyTilt: 0.3,       // 难度对「空格数」的倾斜：每档让新行更偏向 emptyMax 那一端
+    emptyTilt: 0.3,       // 难度对「空格数」的倾斜：每档让新行更偏向 emptyMin（空格更少、行更满）
     advTighten: 2,        // 每升 1 档，困难行间隔缩短几行（有下限 4）
     levelWeights: null,   // 每个档位的 [1格,2格,3格,4格] 权重表；null = 用 DEFAULT_LEVEL_WEIGHTS
 
@@ -875,13 +875,14 @@ kbd{
     };
   }
 
-  // 新行的空格数：范围固定在 emptyMin~emptyMax，但难度越高越偏向「多空格」那一端
+  // 新行的空格数：范围固定在 emptyMin~emptyMax；
+  // 难度越高 → 越偏向「空格更少」那一端（行越满）
   function pickEmpty() {
     var lo = clamp(CFG.emptyMin | 0, 1, 8);
     var hi = clamp(CFG.emptyMax | 0, lo, 8);
     if (hi === lo) return lo;
     var lv = tideLevel(), w = {}, k;
-    for (k = lo; k <= hi; k++) w[k] = 1 + lv * (k - lo) * CFG.emptyTilt;
+    for (k = lo; k <= hi; k++) w[k] = 1 + lv * (hi - k) * CFG.emptyTilt;   // k 越小权重越高
     return weightedPick(w);
   }
 
@@ -1733,7 +1734,7 @@ kbd{
       '<div class="fields">' +
       num('cfgEmptyMin', '新行最少空格数', CFG.emptyMin, 1, 1) +
       num('cfgEmptyMax', '新行最多空格数', CFG.emptyMax, 1, 1) +
-      num('cfgEmptyTilt', '难度对空格的倾斜（越大后期空洞越多）', CFG.emptyTilt, 0.05, 0) +
+      num('cfgEmptyTilt', '难度对空格的倾斜（越大后期行越满、空格越少）', CFG.emptyTilt, 0.05, 0) +
       num('cfgRamp', '难度提升间隔（涨行数，0=关闭）', CFG.rampEvery, 5, 0) +
       num('cfgMinRows', '最少保留行数（有格子的行）', CFG.minRows, 1, 0) +
       '</div>' +
