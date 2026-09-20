@@ -378,6 +378,15 @@ kbd{
 .wrow input:focus{ outline:none; border-color:var(--t1); }
 .wrow .wdel{ padding:4px 0; font-size:12px; border-radius:8px; line-height:1; }
 
+/* 数值导出文本框 */
+.cfgexport{
+  width:100%; min-height:92px; margin-top:6px; padding:8px 10px; border-radius:10px;
+  background:#0a1520; color:var(--ink); border:1px solid var(--panel-b);
+  font-family:ui-monospace,Consolas,"Courier New",monospace; font-size:11px; line-height:1.55;
+  resize:vertical; word-break:break-all;
+}
+.cfgexport:focus{ outline:none; border-color:var(--t1); }
+
 /* ---------------- 响应式 ---------------- */
 
 @media (max-width: 1080px){
