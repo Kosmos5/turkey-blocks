@@ -271,6 +271,28 @@ kbd{
 
 /* ---------------- 预览 / 技能面板 ---------------- */
 
+/* 下一行预告：贴在棋盘底边的加粗色条 */
+.nextstrip{
+  display:flex;
+  width:calc(var(--cell) * 9);
+  height:clamp(10px, calc(var(--cell) * 0.3), 18px);
+  margin:5px auto 0;
+  border-radius:5px; overflow:hidden;
+  background:repeating-linear-gradient(90deg, rgba(255,255,255,.07) 0 1px, transparent 1px var(--cell));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.10), 0 3px 8px rgba(0,0,0,.35);
+  transition:opacity .2s;
+}
+.nextstrip.off{ opacity:.12; }
+.ncell{
+  width:var(--cell); height:100%; box-sizing:border-box;
+  border:0 solid rgba(255,255,255,.9);
+  background:transparent;
+  transition:background .15s;
+}
+.ncell.on{ background:var(--c); }
+.ncell.e-l{ border-left-width:2px; }
+.ncell.e-r{ border-right-width:2px; }
+
 .preview{ display:flex; flex-direction:column; align-items:center; gap:6px; min-height:42px; }
 .pvrow{ display:flex; gap:2px; }
 .mini{
